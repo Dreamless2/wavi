@@ -96,54 +96,53 @@ async function startSpoofedSession() {
         const { connection, lastDisconnect, qr } = update
 
         if (qr) {
-            // Gerando um link limpo e direto para a imagem do QR Code
             const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qr)}`;
-            
-            // Força a saída em linhas separadas e limpas para o Back4App ler facilmente
-            console.log('--- NOVA TENTATIVA DE QR CODE ---');
+
+            console.log('--- NEW QR CODE AVAILABLE ---');
             console.log(qrImageUrl);
-            console.log('---------------------------------');
+            console.log('----------------------------');
 
-            // ALTERNATIVA INFALÍVEL: Como os logs da nuvem somem, envia o link direto para o seu Telegram configurado
             try {
-                void notifyTelegramEvent('QR CODE DISPONÍVEL', `Escaneie este link no seu navegador:\n\n${qrImageUrl}`);
+                void notifyTelegramEvent(
+                    'QR CODE AVAILABLE',
+                    `Open the following link in your browser and scan the QR code with WhatsApp:\n\n${qrImageUrl}`
+                );
             } catch (teleErr) {
-                console.log('[Telegram] Não foi possível enviar o link por lá:', teleErr.message);
+                console.log('[Telegram] Unable to send QR code link:', teleErr.message);
             }
-        }
+            
+            if (connection === 'close') {
+                if (presenceTimer) { clearTimeout(presenceTimer); presenceTimer = null }
+                const statusCode = lastDisconnect?.error?.output?.statusCode
+                const shouldReconnect = statusCode !== DisconnectReason.loggedOut
+                console.log(`Connection closed. Reconnecting: ${shouldReconnect}`)
+                void notifyTelegramEvent('DISCONNECTED', [
+                    `Status code: ${statusCode || 'unknown'}`,
+                    `Reconnect: ${shouldReconnect}`,
+                    `Error: ${formatError(lastDisconnect?.error || 'unknown')}`,
+                ].join('\n'))
+                if (shouldReconnect) startSpoofedSession()
+            } else if (connection === 'open') {
+                const ownJid = jidNormalizedUser(sock.user?.id)
+                console.log(`Connected as ${ownJid}. Waiting for View Once messages...`)
 
-        if (connection === 'close') {
-            if (presenceTimer) { clearTimeout(presenceTimer); presenceTimer = null }
-            const statusCode = lastDisconnect?.error?.output?.statusCode
-            const shouldReconnect = statusCode !== DisconnectReason.loggedOut
-            console.log(`Connection closed. Reconnecting: ${shouldReconnect}`)
-            void notifyTelegramEvent('DISCONNECTED', [
-                `Status code: ${statusCode || 'unknown'}`,
-                `Reconnect: ${shouldReconnect}`,
-                `Error: ${formatError(lastDisconnect?.error || 'unknown')}`,
-            ].join('\n'))
-            if (shouldReconnect) startSpoofedSession()
-        } else if (connection === 'open') {
-            const ownJid = jidNormalizedUser(sock.user?.id)
-            console.log(`Connected as ${ownJid}. Waiting for View Once messages...`)
-
-            const schedulePresence = () => {
-                const delay = randomBetween(PRESENCE_INTERVAL_MIN_MS, PRESENCE_INTERVAL_MAX_MS)
-                presenceTimer = setTimeout(async () => {
-                    try {
-                        await sock.sendPresenceUpdate('available')
-                        await new Promise(r => setTimeout(r, randomBetween(PRESENCE_BLIP_MIN_MS, PRESENCE_BLIP_MAX_MS)))
-                        await sock.sendPresenceUpdate('unavailable')
-                    } catch (err) {
-                        console.log(`[Presence] Failed: ${err.message}`)
-                        void notifyTelegramEvent('PRESENCE ERROR', formatError(err))
-                    }
-                    schedulePresence()
-                }, delay)
+                const schedulePresence = () => {
+                    const delay = randomBetween(PRESENCE_INTERVAL_MIN_MS, PRESENCE_INTERVAL_MAX_MS)
+                    presenceTimer = setTimeout(async () => {
+                        try {
+                            await sock.sendPresenceUpdate('available')
+                            await new Promise(r => setTimeout(r, randomBetween(PRESENCE_BLIP_MIN_MS, PRESENCE_BLIP_MAX_MS)))
+                            await sock.sendPresenceUpdate('unavailable')
+                        } catch (err) {
+                            console.log(`[Presence] Failed: ${err.message}`)
+                            void notifyTelegramEvent('PRESENCE ERROR', formatError(err))
+                        }
+                        schedulePresence()
+                    }, delay)
+                }
+                schedulePresence()
             }
-            schedulePresence()
-        }
-    })
+        })
 
     sock.ev.on('messages.upsert', async ({ messages, type }) => {
         if (type !== 'notify') return
