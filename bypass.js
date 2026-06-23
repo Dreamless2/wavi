@@ -6,12 +6,16 @@ import express from 'express'
 import { writeFileSync, mkdirSync, readFileSync, readdirSync, existsSync } from 'fs'
 import { createClient } from '@supabase/supabase-js'
 
+const app = express()
+const PORT = process.env.PORT || 15000
+app.get('/', (req, res) => res.send('Started!'))
+app.listen(PORT, () => console.log(`Serving on port ${PORT}`))
+
 const supabaseUrl = process.env.SUPABASE_URL
 const supabaseKey = process.env.SUPABASE_ANON_KEY
 const supabase = createClient(supabaseUrl, supabaseKey)
 const BUCKET_NAME = 'auth'
 const AUTH_DIR = './auth_info_android_bypass'
-
 const DOWNLOADS_DIR = './downloads'
 mkdirSync(DOWNLOADS_DIR, { recursive: true })
 
@@ -121,8 +125,6 @@ async function startSpoofedSession() {
     if (!existsSync(AUTH_DIR)) {
         mkdirSync(AUTH_DIR, { recursive: true })
     }
-    await downloadSessionFromSupabase()
-
     const { state, saveCreds } = await useMultiFileAuthState('./auth_info_android_bypass')
     let presenceTimer = null
 
@@ -136,6 +138,7 @@ async function startSpoofedSession() {
 
     sock.ev.on('creds.update', async () => {
         await saveCreds()
+
         try {
             const localFiles = readdirSync(AUTH_DIR)
             for (const file of localFiles) {
@@ -197,7 +200,6 @@ async function startSpoofedSession() {
                     schedulePresence()
                 }, delay)
             }
-
             schedulePresence()
         }
     })
@@ -295,16 +297,5 @@ async function startSpoofedSession() {
         }
     })
 }
-
-const app = express()
-
-app.get('/', (req, res) => {
-    res.send('OK')
-})
-
-const PORT = process.env.PORT || 15000
-app.listen(PORT, () => {
-    console.log(`Listening on port ${PORT}`)
-})
 
 startSpoofedSession()
