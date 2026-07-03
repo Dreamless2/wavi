@@ -86,7 +86,6 @@ if (src.includes(oldWebInfo)) {
     console.log('getWebInfo not found as expected — may need manual check')
 }
 
-// 3. Patch getClientPayload() — omit webInfo when undefined, no webInfo field at all for Android
 const oldClientPayload = `const getClientPayload = (config) => {
     const payload = {
         connectType: proto.ClientPayload.ConnectType.WIFI_UNKNOWN,
