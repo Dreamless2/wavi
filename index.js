@@ -91,7 +91,7 @@ function printStartupConfig() {
     const will = (enabled) => enabled ? 'will' : 'will NOT'
     console.log([
         '',
-        'waview started!',
+        'whatsview started!',
         '--------------------------------------',
         `Telegram: ${config.hasCredentials ? 'OK' : 'MISSING CREDENTIALS'}`,
         `Normal media from DMs ${will(config.sendRegularMedia)} be sent`,
