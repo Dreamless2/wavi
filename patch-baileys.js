@@ -1,11 +1,11 @@
 /**
- * Post-install patch for @whiskeysockets/baileys
+ * Post-install patch for baileys
  * Spoofs UserAgent and companion device props to present as Android (Pixel 10) WhatsApp client.
  * Without this, the server identifies us as a web client and withholds view-once media.
  */
 import { readFileSync, writeFileSync } from 'fs'
 
-const TARGET = './node_modules/@whiskeysockets/baileys/lib/Utils/validate-connection.js'
+const TARGET = './node_modules/baileys/lib/Utils/validate-connection.js'
 
 let src = readFileSync(TARGET, 'utf-8')
 
