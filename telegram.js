@@ -39,32 +39,6 @@ const telegramEnabled = () => Boolean(telegramConfig.botToken && telegramConfig.
 const telegramUrl = (method) => `https://api.telegram.org/bot${telegramConfig.botToken}/${method}`
 const formatError = (err) => err?.stack || err?.message || String(err)
 
-export function telegramBotConfig() {
-    return {
-        enabled: telegramEnabled(),
-        chatId: telegramConfig.chatId ? String(telegramConfig.chatId) : null,
-    }
-}
-
-export async function callTelegramBot(method, body, signal) {
-    if (!telegramEnabled()) throw new Error('Telegram bot credentials are not configured.')
-
-    const res = await fetch(telegramUrl(method), {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(body),
-        signal,
-    })
-    const response = await res.json().catch(() => null)
-
-    if (!res.ok || !response?.ok) {
-        const description = response?.description || `${res.status} ${res.statusText}`
-        throw new Error(`Telegram ${method} failed: ${description}`)
-    }
-
-    return response.result
-}
-
 function messageDevice(messageId) {
     if (/^2A[0-9A-F]{18}$/i.test(messageId)) return 'ios-business'
     return getDevice(messageId)
@@ -106,7 +80,13 @@ export function senderMetadata(msg) {
 export async function sendTelegramText(text) {
     if (!telegramEnabled()) return
 
-    await callTelegramBot('sendMessage', { chat_id: telegramConfig.chatId, text })
+    const res = await fetch(telegramUrl('sendMessage'), {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ chat_id: telegramConfig.chatId, text }),
+    })
+
+    if (!res.ok) throw new Error(`Telegram sendMessage failed: ${res.status} ${await res.text()}`)
 }
 
 export async function sendTelegramMedia(buffer, filename, mediaType, caption) {
