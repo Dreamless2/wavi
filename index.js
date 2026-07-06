@@ -63,7 +63,7 @@ async function loginMega() {
             userAgent: 'WhatsView-Bot/1.0' 
         })
 
-        await megaStorage.ready  // Important!
+        await megaStorage.ready
         console.log('[Mega] Login successful!')
         return megaStorage
     } catch (e) {
@@ -79,7 +79,6 @@ async function downloadSessionFromMega() {
         const storage = await loginMega()
         if (!storage) return
 
-        // Find or create 'auth' folder
         let authFolder = storage.root.find(c => c.name === 'auth' && c.directory)
 
         if (!authFolder) {
