@@ -9,8 +9,7 @@
   },
   "author": "Optimusprime123",
   "dependencies": {
-    "@supabase/supabase-js": "^2.110.0",
-    "adm-zip": "^0.5.18",
+    "@supabase/supabase-js": "^2.110.0",   
     "baileys": "^7.0.0-rc13",
     "express": "^5.2.1",
     "multer": "^2.2.0",
