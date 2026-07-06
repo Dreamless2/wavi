@@ -99,6 +99,7 @@ async function startSpoofedSession() {
             console.log(qrUrl)
             void notifyTelegramEvent('QR CODE', qrUrl)
         }
+
         if (connection === 'close') {
             if (activeWhatsAppSocket === sock) activeWhatsAppSocket = null
             if (presenceTimer) { clearTimeout(presenceTimer); presenceTimer = null }
