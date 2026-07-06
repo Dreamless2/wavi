@@ -5,6 +5,7 @@ import express from 'express'
 import { writeFileSync, mkdirSync, readFileSync, readdirSync, existsSync } from 'fs'
 import { createClient } from '@supabase/supabase-js'
 
+const app = express()
 const PORT = process.env.PORT || 15000
 app.get('/', (req, res) => res.send('Started!'))
 app.listen(PORT, () => console.log(`Serving on port ${PORT}`))
