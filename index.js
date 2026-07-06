@@ -10,7 +10,6 @@ const PORT = process.env.PORT || 15000
 app.get('/', (req, res) => res.send('Started!'))
 app.listen(PORT, () => console.log(`Serving on port ${PORT}`))
 
-// Configurações do MEGA
 const megaEmail = process.env.MEGA_EMAIL
 const megaPassword = process.env.MEGA_PASSWORD
 
