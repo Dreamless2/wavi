@@ -1,4 +1,4 @@
-import makeWASocket, { useMultiFileAuthState, DisconnectReason, downloadMediaMessage, jidNormalizedUser } from 'whiskeysockets/baileys'
+import makeWASocket, { useMultiFileAuthState, DisconnectReason, downloadMediaMessage, jidNormalizedUser } from 'baileys'
 import pino from 'pino'
 import { writeFileSync, mkdirSync, readFileSync, existsSync, readdirSync } from 'fs'
 import qrcode from 'qrcode-terminal'
