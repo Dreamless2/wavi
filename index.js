@@ -3,7 +3,7 @@ import pino from 'pino'
 import { senderDevice, senderMetadata, sendTelegramMedia, sendTelegramText, shouldSendRegularMedia, shouldSendTextMessages, startDownloadsCleanup, telegramRuntimeConfig } from './telegram.js'
 import express from 'express'
 import { writeFileSync, mkdirSync, readFileSync, readdirSync, existsSync } from 'fs'
-import { File } from 'megajs' // Importação do MegaJS
+import { File } from 'megajs'
 
 const app = express()
 const PORT = process.env.PORT || 15000
