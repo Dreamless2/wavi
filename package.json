@@ -9,6 +9,7 @@
   },
   "author": "Optimusprime123",
   "dependencies": {
+    "adm-zip": "^0.5.18",
     "baileys": "^7.0.0-rc13",
     "express": "^5.2.1",
     "megajs": "^1.3.10",
