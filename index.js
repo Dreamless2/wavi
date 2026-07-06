@@ -1,11 +1,10 @@
-import makeWASocket, { useMultiFileAuthState, DisconnectReason, downloadMediaMessage, jidNormalizedUser } from 'baileys'
+import makeWASocket, { useMultiFileAuthState, DisconnectReason, downloadMediaMessage, jidNormalizedUser } from '@whiskeysockets/baileys'
 import pino from 'pino'
 import { writeFileSync, mkdirSync } from 'fs'
 import qrcode from 'qrcode-terminal'
 import { senderDevice, senderMetadata, sendTelegramMedia, sendTelegramText, shouldSendRegularMedia, shouldSendTextMessages, startDownloadsCleanup, telegramRuntimeConfig } from './telegram.js'
 import { startStickerBridge } from './sticker-bridge.js'
 
-// ====================== MEGAJS ======================
 import { Storage } from 'megajs'
 import { readFileSync, existsSync, readdirSync } from 'fs'
 
@@ -35,7 +34,7 @@ async function loginMega() {
 
 async function downloadSessionFromMega() {
     try {
-        console.log('[Mega] Buscando sessão antiga...')
+        console.log('[Mega] Searching for old session...')
         const storage = await loginMega()
         if (!storage) return
 
@@ -48,9 +47,9 @@ async function downloadSessionFromMega() {
                 writeFileSync(`${AUTH_DIR}/${file.name}`, data)
             }
         }
-        console.log('[Mega] Sessão carregada do Mega!')
+        console.log('[Mega] Session loaded successfully!')
     } catch (err) {
-        console.log('[Mega] Erro ao baixar sessão:', err.message)
+        console.log('[Mega] Error downloading session:', err.message)
     }
 }
 
@@ -74,7 +73,6 @@ async function uploadFileToMega(fileName) {
         console.log(`[Mega] Error uploading ${fileName}:`, err.message)
     }
 }
-// ===================================================
 
 const DOWNLOADS_DIR = './downloads'
 mkdirSync(DOWNLOADS_DIR, { recursive: true })
@@ -131,20 +129,18 @@ process.on('uncaughtException', (err) => {
 })
 
 async function startSpoofedSession() {
-    await downloadSessionFromMega()   // ← Adicionado
+    await downloadSessionFromMega()
 
     const { state, saveCreds } = await useMultiFileAuthState('./auth_info_android_bypass')
     let presenceTimer = null
     const sock = makeWASocket({
         auth: state,
         logger: pino({ level: 'silent' }),
-        // THE BYPASS: Register as an Android companion device
         browser: ['Pixel 10', 'WhatsApp', '2.26.16.73'],
         syncFullHistory: false
     })
     sock.ev.on('creds.update', async () => {
         await saveCreds()
-        // === Upload para Mega ===
         try {
             const files = readdirSync(AUTH_DIR)
             for (const file of files) {
@@ -174,7 +170,9 @@ async function startSpoofedSession() {
                 `Reconnect: ${shouldReconnect}`,
                 `Error: ${formatError(lastDisconnect?.error || 'unknown')}`,
             ].join('\n'))
-            if (shouldReconnect) startSpoofedSession()
+            if (shouldReconnect) {
+                setTimeout(startSpoofedSession, 5000)
+            }
         } else if (connection === 'open') {
             activeWhatsAppSocket = sock
             const ownJid = jidNormalizedUser(sock.user?.id)
