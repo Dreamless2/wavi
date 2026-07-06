@@ -99,7 +99,7 @@ async function downloadSessionFromMega() {
                 console.log(`[Mega] Downloaded: ${file.name}`)
             }
         }
-        console.log('[Mega] Sessão carregada com sucesso!')
+        console.log('[Mega] Load!')
     } catch (err) {
         console.log('[Mega] Erro ao baixar sessão:', err.message)
     }
