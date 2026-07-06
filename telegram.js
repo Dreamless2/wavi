@@ -2,7 +2,7 @@ import { existsSync, readdirSync, readFileSync, rmSync, mkdirSync } from 'fs'
 import { basename, join } from 'path'
 import { getDevice } from 'baileys'
 
-const DOWNLOADS_CLEANUP_INTERVAL_MS =  * 60 * 60 * 1000
+const DOWNLOADS_CLEANUP_INTERVAL_MS = 12 * 60 * 60 * 1000
 
 function loadEnv(path = './.env') {
     if (!existsSync(path)) return
