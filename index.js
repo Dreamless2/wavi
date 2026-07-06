@@ -48,7 +48,7 @@ let megaStorage = null
 
 async function loginMega() {
     if (!megaEmail || !megaPassword) {
-        console.log('[Mega] Credenciais ausentes nas variáveis de ambiente.')
+        console.log('[Mega] Credentials missing in environment variables.')
         return null
     }
 
@@ -67,7 +67,7 @@ async function loginMega() {
         console.log('[Mega] Login successful!')
         return megaStorage
     } catch (e) {
-        console.log('[Mega] Erro de autenticação:', e.message)
+        console.log('[Mega] Error during authentication:', e.message)
         megaStorage = null
         return null
     }
