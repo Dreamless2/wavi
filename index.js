@@ -10,7 +10,10 @@ const supabaseUrl = process.env.SUPABASE_URL
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY
 const AUTH_DIR = './auth_info_android_bypass'
 
-
+const app = express()
+const PORT = process.env.PORT || 15000
+app.get('/', (req, res) => res.send('Started!'))
+app.listen(PORT, () => console.log(`Serving on port ${PORT}`))
 
 const supabase = createClient(supabaseUrl, supabaseKey)
 
