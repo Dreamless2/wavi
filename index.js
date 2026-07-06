@@ -60,7 +60,7 @@ async function loginMega() {
         megaStorage = new Storage({
             email: megaEmail,
             password: megaPassword,
-            userAgent: 'WhatsView-Bot/1.0'  // Recommended
+            userAgent: 'WhatsView-Bot/1.0' 
         })
 
         await megaStorage.ready  // Important!
