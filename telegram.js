@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, readFileSync, rmSync, mkdirSync } from 'fs'
 import { basename, join } from 'path'
-import { getDevice } from '@whiskeysockets/baileys'
+import { getDevice } from 'baileys'
 
 const DOWNLOADS_CLEANUP_INTERVAL_MS = 48 * 60 * 60 * 1000
 
