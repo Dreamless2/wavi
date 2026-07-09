@@ -17,13 +17,11 @@ app.get('/', (req, res) => {
 app.use((req, res) => {
     res.status(404).send('Not Found');
 });
-// 500 error
+
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).send('Internal Server Error');
-}
-
-
+});
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
