@@ -10,7 +10,7 @@ const app = express()
 const port = 10000;
 
 app.get('/', (req, res) => {
-    res.send('Running...!'); // Resposta necessária para o navegador
+    res.send('Running...!');
 });
 
 app.listen(port, () => {
