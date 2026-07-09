@@ -14,7 +14,9 @@ app.get('/', (req, res) => {
     res.send('Running!');
 });
 
-ap.use((req, res) )
+ap.use((req, res) => {
+    res.status(404).send('Not Found');
+})
 
 
 app.listen(PORT, () => {
