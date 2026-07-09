@@ -99,7 +99,6 @@ async function startSpoofedSession() {
         const { connection, lastDisconnect, qr } = update
 
          if (qr) {
-            // Exibe o QR Code em formato de imagem URL e gera no terminal também
             const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qr)}`
             console.log('--- New QR CODE ---')
             console.log(qrUrl)
