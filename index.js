@@ -14,8 +14,8 @@ app.get('/', (req, res) => {
     res.send('Running!');
 });
 
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });
 
 const DOWNLOADS_DIR = './downloads'
