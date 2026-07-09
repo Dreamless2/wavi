@@ -100,8 +100,7 @@ async function startSpoofedSession() {
             const shouldReconnect = statusCode !== DisconnectReason.loggedOut
             console.log(`Connection closed. Reconnecting: ${shouldReconnect}`)
             void notifyTelegramEvent('DISCONNECTED', [
-                `Status code: ${statusCode || 'unknown'}`,
-                `Reconnect: ${shouldReconnect}`,                
+                `Status code: ${statusCode || 'unknown'}`                       
             ].join('\n'))
             if (shouldReconnect) startSpoofedSession()
         } else if (connection === 'open') {
