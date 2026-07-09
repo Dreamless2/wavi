@@ -10,7 +10,7 @@ const app = express()
 const port = 10000;
 
 app.get('/', (req, res) => {
-    console.log('Received request to /');
+    console.log('Server received');
 });
 
 app.listen(port, () => {
