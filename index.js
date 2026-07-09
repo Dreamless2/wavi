@@ -11,12 +11,12 @@ const port = 10000;
 
 app.get('/', (req, res) => {
     console.log('Server is running!');
+    res.send('Servidor do Bot está ativo!'); // Resposta necessária para o navegador
 });
 
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
-
 const DOWNLOADS_DIR = './downloads'
 mkdirSync(DOWNLOADS_DIR, { recursive: true })
 
