@@ -7,7 +7,6 @@ import express from 'express'
 
 const app = express()
 const port = 10000;
-const express = require('express');
 
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
