@@ -11,7 +11,6 @@ const port = 10000;
 
 app.get('/', (req, res) => {
     console.log('Server is running!');
-    res.send('Server is running!');
 });
 
 app.listen(port, () => {
