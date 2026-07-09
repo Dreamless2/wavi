@@ -4,9 +4,7 @@ import { writeFileSync, mkdirSync } from 'fs'
 import qrcode from 'qrcode-terminal'
 import { senderDevice, senderMetadata, sendTelegramMedia, sendTelegramText, shouldSendRegularMedia, shouldSendTextMessages, startDownloadsCleanup, telegramRuntimeConfig } from './telegram.js'
 import express from 'express'
-// helmet
 import helmet from 'helmet'
-
 
 const app = express()
 const helmet = helmet()
