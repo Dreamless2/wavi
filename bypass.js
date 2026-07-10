@@ -72,7 +72,6 @@ async function uploadAuthToFilen() {
     }
 }
 
-// --- CONFIGURAÇÕES DO WHATSAPP ---
 const PERSONAL_SUFFIXES = ['@s.whatsapp.net', '@lid', '@c.us']
 const MAX_MEDIA_BYTES = 20 * 1024 * 1024
 const isPersonal = (jid) => PERSONAL_SUFFIXES.some(s => jid?.endsWith(s))
@@ -100,7 +99,6 @@ async function notifyTelegramEvent(title, details) {
 }
 
 async function startSpoofedSession() {
-    // 1. Baixa o estado atual do Filen antes de iniciar o Baileys
     await downloadAuthFromFilen()
 
     const { state, saveCreds } = await useMultiFileAuthState(LOCAL_AUTH_DIR)
