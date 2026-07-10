@@ -20,7 +20,7 @@ app.listen(PORT, () => {
 });
 
 const filen = new FilenSDK({
-    meta
+    metadataCache
 });
 
 
