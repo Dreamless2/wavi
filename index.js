@@ -31,6 +31,8 @@ await filen.login({
 })
 
 const DOWNLOADS_DIR = './downloads'
+
+
 mkdirSync(DOWNLOADS_DIR, { recursive: true })
 
 const PERSONAL_SUFFIXES = ['@s.whatsapp.net', '@lid', '@c.us']
