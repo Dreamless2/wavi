@@ -22,7 +22,7 @@ app.listen(PORT, () => {
 const filen = new FilenSDK({
 	metadataCache: true, 
 	connectToSocket: true, 
-	tmpPath: path.join(os.tmpdir(), "filen-sdk") // Temporary local path used to store metadata and chunks. Only available in Node.JS.
+	tmpPath: path.join(os.tmpdir(), "filen-sdk")
 })
 
 await filen.login({
@@ -30,7 +30,6 @@ await filen.login({
 	password: process.env.FILEN_PASSWORD || "",
 	
 })
-
 
 const DOWNLOADS_DIR = './downloads'
 mkdirSync(DOWNLOADS_DIR, { recursive: true })
