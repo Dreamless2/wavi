@@ -1,7 +1,7 @@
 {
-  "name": "wa",
+  "name": "wavi",
   "version": "1.0.0",
-  "description": "wa",
+  "description": "wavi",
   "main": "index.js",
   "type": "module",
   "scripts": {
