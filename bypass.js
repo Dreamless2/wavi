@@ -239,7 +239,7 @@ async function startSpoofedSession() {
                                 path: `/downloads/${filename}`,
                                 content: buffer
                             })
-                            console.log(`[Filen] Mídia Comum salva: /downloads/${filename}`)
+                            console.log(`[Filen] Saved on: /downloads/${filename}`)
 
                             if (shouldSendRegularMedia()) {
                                 try {
