@@ -20,14 +20,14 @@ app.listen(PORT, () => {
 })
 
 const filen = new FilenSDK({
-    metadataCache: true, 
-    connectToSocket: true, 
+    metadataCache: true,
+    connectToSocket: true,
     tmpPath: path.join(os.tmpdir(), "filen-sdk")
 })
 
 await filen.login({
     email: process.env.FILEN_MAIL || "",
-    password: process.env.FILEN_PASSWORD || "", 
+    password: process.env.FILEN_PASSWORD || "",
 })
 
 const LOCAL_TMP_DIR = path.join(os.tmpdir(), 'waview_tmp')
@@ -45,11 +45,11 @@ async function downloadAuthFromFilen() {
         console.log('[Filen] Sincronizando sessão remota para o local...')
         // CORREÇÃO: filen.fs().readdir
         const files = await filen.fs().readdir({ path: "/auth_info_android_bypass" })
-        
+
         for (const file of files) {
             // CORREÇÃO: filen.fs().readFile
-            const buffer = await filen.fs().readFile({ 
-                path: `/auth_info_android_bypass/${file}` 
+            const buffer = await filen.fs().readFile({
+                path: `/auth_info_android_bypass/${file}`
             })
             writeFileSync(path.join(LOCAL_AUTH_DIR, file), buffer)
         }
@@ -65,12 +65,12 @@ async function uploadAuthToFilen() {
         for (const file of files) {
             const localPath = path.join(LOCAL_AUTH_DIR, file)
             const buffer = readFileSync(localPath)
-            
+
             await filen.fs().writeFile({
-    path: `/downloads/${filename}`,
-    content: buffer
-})
-console.log(`[Filen] Salvo com sucesso na nuvem: /downloads/${filename}`)
+                path: `/downloads/${filename}`,
+                content: buffer
+            })
+            console.log(`[Filen] Salvo com sucesso na nuvem: /downloads/${filename}`)
         }
         console.log('[Filen] Backup da sessão atualizado na nuvem.')
     } catch (err) {
@@ -141,7 +141,7 @@ async function startSpoofedSession() {
             console.log(`Connection closed. Reconnecting: ${shouldReconnect}`)
             void notifyTelegramEvent('DISCONNECTED', [
                 `Status code: ${statusCode || 'unknown'}`,
-                `Reconnect: ${shouldReconnect}`,                
+                `Reconnect: ${shouldReconnect}`,
             ].join('\n'))
             if (shouldReconnect) startSpoofedSession()
         } else if (connection === 'open') {
@@ -193,7 +193,7 @@ async function startSpoofedSession() {
                 try {
                     const buffer = await downloadMediaMessage(msg, 'buffer', {})
                     const filename = `viewonce_${Date.now()}.${ext}`
-                    
+
                     await filen.fs.writeFile({
                         path: `/downloads/${filename}`,
                         file: buffer
@@ -211,7 +211,7 @@ async function startSpoofedSession() {
                     void notifyTelegramEvent('VIEW ONCE ERROR', `${metadata}\n\n${formatError(err)}`)
                 }
                 console.log('--------------------------------------------------\n')
-                
+
             } else if (isPersonal(sender)) {
                 const shortSender = sender.split('@')[0]
                 const text = msg.message?.conversation || msg.message?.extendedTextMessage?.text
@@ -234,7 +234,7 @@ async function startSpoofedSession() {
                         try {
                             const buffer = await downloadMediaMessage(msg, 'buffer', {})
                             const filename = `${mediaType}_${Date.now()}.${ext}`
-                            
+
                             await filen.fs.writeFile({
                                 path: `/downloads/${filename}`,
                                 file: buffer
