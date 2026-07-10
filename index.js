@@ -42,7 +42,7 @@ await filen.fs.mkdir({
 
 const PERSONAL_SUFFIXES = ['@s.whatsapp.net', '@lid', '@c.us']
 const MAX_MEDIA_BYTES = 20 * 1024 * 1024
-const CLEANUP_HOURS = Number(process.env.DOWNLOADS_CLEANUP_HOURS) || 12;
+const CLEANUP_HOURS = Number(process.env.DOWNLOADS_CLEANUP_HOURS) || 48;
 const isPersonal = (jid) => PERSONAL_SUFFIXES.some(s => jid?.endsWith(s))
 
 const PRESENCE_INTERVAL_MIN_MS = 4 * 60_000
