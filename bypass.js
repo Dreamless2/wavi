@@ -70,7 +70,7 @@ async function uploadAuthToFilen() {
                 path: `/downloads/${filename}`,
                 content: buffer
             })
-            console.log(`[Filen] Salvo com sucesso na nuvem: /downloads/${filename}`)
+            console.log(`[Filen] Saved on: /downloads/${filename}`)
         }
         console.log('[Filen] Backup da sessão atualizado na nuvem.')
     } catch (err) {
