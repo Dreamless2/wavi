@@ -19,7 +19,12 @@ app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
 
-const 
+const filen = new FilenSDK({
+    apiKey: process.env.FILEN_API_KEY || '',
+    apiSecret: process.env.FILEN_API_SECRET || '',
+    baseUrl: 'https://api.filen.io/v1',
+    timeout: 30000,
+});
 
 
 const DOWNLOADS_DIR = './downloads'
