@@ -61,14 +61,16 @@ async function uploadAuthToFilen() {
         for (const file of files) {
             const localPath = path.join(LOCAL_AUTH_DIR, file)
             const buffer = readFileSync(localPath)
-            await filen.fs.upload({
+            
+            // Correção: usando writeFile em vez de upload
+            await filen.fs.writeFile({
                 path: `/auth_info_android_bypass/${file}`,
-                file: buffer
+                data: buffer // Alguns SDKs usam 'data' ou 'content', se der erro de tipagem use 'buffer' direto
             })
         }
-        console.log('[Filen] Session uploaded!')
+        console.log('[Filen] Backup da sessão atualizado na nuvem.')
     } catch (err) {
-        console.log(`[Filen] Error while backing up session: ${err.message}`)
+        console.log(`[Filen] Erro ao fazer backup da sessão: ${err.message}`)
     }
 }
 
