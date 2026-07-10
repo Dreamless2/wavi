@@ -8,6 +8,10 @@ import express from 'express'
 const app = express()
 const PORT = process.env.PORT || 10000;
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 3603131 (index.js)
 app.get('/', (req, res) => {
     res.send('Running!');
 });
@@ -101,7 +105,7 @@ async function startSpoofedSession() {
             const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qr)}`
             console.log('--- New QR CODE ---')
             console.log(qrUrl)
-            qrcode.generate(qr, { small: true }) // <- Adicionado para desenhar o QR Code no terminal
+            qrcode.generate(qr, { small: true })
             void notifyTelegramEvent('QR CODE', qrUrl)
         }
 
