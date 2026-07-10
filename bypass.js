@@ -64,7 +64,7 @@ async function uploadAuthToFilen() {
             
             await filen.fs.writeFile({
                 path: `/auth_info_android_bypass/${file}`,
-                data: buffer // Alguns SDKs usam 'data' ou 'content', se der erro de tipagem use 'buffer' direto
+                data: buffer
             })
         }
         console.log('[Filen] Session uploaded!')
