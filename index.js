@@ -4,24 +4,12 @@ import { writeFileSync, mkdirSync } from 'fs'
 import qrcode from 'qrcode-terminal'
 import { senderDevice, senderMetadata, sendTelegramMedia, sendTelegramText, shouldSendRegularMedia, shouldSendTextMessages, startDownloadsCleanup, telegramRuntimeConfig } from './telegram.js'
 import express from 'express'
-import helmet from 'helmet'
 
 const app = express()
 const PORT = process.env.PORT || 10000;
 
-app.use(helmet());
-
 app.get('/', (req, res) => {
     res.send('Running!');
-});
-
-app.use((req, res) => {
-    res.status(404).send('Not Found');
-});
-
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send('Internal Server Error');
 });
 
 app.listen(PORT, () => {
