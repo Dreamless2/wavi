@@ -27,8 +27,7 @@ const filen = new FilenSDK({
 
 await filen.login({
 	email: process.env.FILEN_MAIL || "",
-	password: process.env.FILEN_PASSWORD || "",
-	
+	password: process.env.FILEN_PASSWORD || "",	
 })
 
 const DOWNLOADS_DIR = './downloads'
