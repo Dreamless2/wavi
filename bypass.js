@@ -277,5 +277,4 @@ async function startSpoofedSession() {
     })
 }
 
-// Removemos o startDownloadsCleanup(DOWNLOADS_DIR) local porque agora tudo está na nuvem
 startSpoofedSession()
