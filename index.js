@@ -4,6 +4,9 @@ import { writeFileSync, mkdirSync } from 'fs'
 import qrcode from 'qrcode-terminal'
 import { senderDevice, senderMetadata, sendTelegramMedia, sendTelegramText, shouldSendRegularMedia, shouldSendTextMessages, startDownloadsCleanup, telegramRuntimeConfig } from './telegram.js'
 import express from 'express'
+import os from 'os'
+import path from 'path'
+import { FilenSDK } from '@filen/sdk'
 
 const app = express()
 const PORT = process.env.PORT || 10000;
