@@ -51,7 +51,7 @@ async function downloadAuthFromFilen() {
         }
         console.log('[Filen] Session downloaded!')
     } catch (err) {
-        console.log(`[Filen] Nenhuma sessão prévia encontrada ou erro ao baixar: ${err.message}`)
+        console.log(`[Filen] Not found: ${err.message}`)
     }
 }
 
