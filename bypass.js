@@ -6,7 +6,6 @@ import { senderDevice, senderMetadata, sendTelegramMedia, sendTelegramText, shou
 import { startStickerBridge } from './sticker-bridge.js'
 import express from 'express'
 
-// Create an Express app to serve / on port 8000 from .env
 const app = express()
 const PORT = process.env.PORT || 8000
 app.get('/', (req, res) => {
