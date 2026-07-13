@@ -101,12 +101,12 @@ async function startSpoofedSession() {
     sock.ev.on('connection.update', (update) => {
         const { connection, lastDisconnect, qr } = update
 
-        if (qr) {
+        r) {
             qrcode.generate(qr, { small: true }, (code) => {
                 console.log('\nScan this QR code with WhatsApp:\n')
                 console.log(code)
             })
-        }
+        }if (q
 
         if (connection === 'close') {
             if (activeWhatsAppSocket === sock) activeWhatsAppSocket = null
