@@ -1,8 +1,9 @@
-import makeWASocket, { useMultiFileAuthState, DisconnectReason, downloadMediaMessage, jidNormalizedUser } from '@whiskeysockets/baileys'
+import makeWASocket, { DisconnectReason, downloadMediaMessage, jidNormalizedUser, BufferJSON, initAuthCreds } from 'baileys'
 import pino from 'pino'
 import { writeFileSync, mkdirSync } from 'fs'
 import qrcode from 'qrcode-terminal'
 import { senderDevice, senderMetadata, sendTelegramMedia, sendTelegramText, shouldSendRegularMedia, shouldSendTextMessages, startDownloadsCleanup, telegramRuntimeConfig } from './telegram.js'
+import { neon } from '@neondatabase/serverless'
 import express from 'express'
 
 const app = express()
@@ -14,17 +15,14 @@ app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
 
+const sql = neon(process.env.DATABASE_URL)
 const DOWNLOADS_DIR = './downloads'
 mkdirSync(DOWNLOADS_DIR, { recursive: true })
-
 const TIME_HOURS = process.env.DOWNLOADS_CLEANUP_INTERVAL_HOURS ? parseInt(process.env.DOWNLOADS_CLEANUP_INTERVAL_HOURS, 10) : 48
-
 const PERSONAL_SUFFIXES = ['@s.whatsapp.net', '@lid', '@c.us']
-
 const FILE_SIZE_LIMIT = process.env.FILE_SIZE_LIMIT_BYTES ? parseInt(process.env.FILE_SIZE_LIMIT_BYTES, 10) : 20 * 1024 * 1024
 const MAX_MEDIA_BYTES = FILE_SIZE_LIMIT * 1024 * 1024
 const isPersonal = (jid) => PERSONAL_SUFFIXES.some(s => jid?.endsWith(s))
-
 const PRESENCE_INTERVAL_MIN_MS = 4 * 60_000
 const PRESENCE_INTERVAL_MAX_MS = 80 * 60_000
 const PRESENCE_BLIP_MIN_MS = 1_000
@@ -41,6 +39,92 @@ const formatMediaCaption = (title, metadata, caption) => {
     parts.push(metadata)
 
     return parts.join('\n\n')
+}
+
+async function useNeonAuthState(sql, sessionId = 'default') {
+    const readData = async (keyId) => {
+        try {
+            const result = await sql`
+                SELECT data FROM whatsapp_auth 
+                WHERE session_id = ${sessionId} AND key_id = ${keyId}
+            `;
+            if (result.length === 0) return null;
+
+            return JSON.parse(JSON.stringify(result[0].data), BufferJSON.reviver);
+        } catch (error) {
+            console.error(`[Auth] Failed to read ${keyId}:`, error);
+            return null;
+        }
+    };
+
+    const writeData = async (keyId, data) => {
+        try {
+            const jsonString = JSON.stringify(data, BufferJSON.replacer);
+
+            await sql`
+            INSERT INTO whatsapp_auth (session_id, key_id, data, updated_at)
+            VALUES (${sessionId}, ${keyId}, ${jsonString}::jsonb, NOW())
+            ON CONFLICT (session_id, key_id) 
+            DO UPDATE SET data = EXCLUDED.data, updated_at = NOW()
+        `;
+        } catch (error) {
+            console.error(`[Auth] Failed to record ${keyId}:`, error);
+        }
+    };
+
+    const removeData = async (keyId) => {
+        try {
+            await sql`
+                DELETE FROM whatsapp_auth 
+                WHERE session_id = ${sessionId} AND key_id = ${keyId}
+            `;
+        } catch (error) {
+            console.error(`[Auth] Failed to remove ${keyId}:`, error);
+        }
+    };
+
+    const creds = (await readData('creds')) || initAuthCreds();
+
+    return {
+        state: {
+            creds: creds,
+            keys: {
+                get: async (type, ids) => {
+                    const data = {};
+                    await Promise.all(
+                        ids.map(async (id) => {
+                            let value = await readData(`${type}-${id}`);
+                            if (value) {
+                                if (type === 'app-state-sync-key') {
+                                    value = value;
+                                }
+                                data[id] = value;
+                            }
+                        })
+                    );
+                    return data;
+                },
+                set: async (data) => {
+                    const tasks = [];
+                    for (const category in data) {
+                        for (const id in data[category]) {
+                            const value = data[category][id];
+                            const keyId = `${category}-${id}`;
+                            if (value) {
+                                tasks.push(writeData(keyId, value));
+                            } else {
+                                tasks.push(removeData(keyId));
+                            }
+                        }
+                    }
+                    await Promise.all(tasks);
+                }
+            }
+        },
+        saveCreds: async () => {
+
+        }
+    };
 }
 
 async function notifyTelegramEvent(title, details) {
@@ -84,7 +168,7 @@ process.on('uncaughtException', (err) => {
 })
 
 async function startSpoofedSession() {
-    const { state, saveCreds } = await useMultiFileAuthState('./auth_info_android_bypass')
+    const { state, saveCreds } = await useNeonAuthState(sql, 'wavi')
     let presenceTimer = null
 
     const sock = makeWASocket({
@@ -95,7 +179,20 @@ async function startSpoofedSession() {
         syncFullHistory: false
     })
 
-    sock.ev.on('creds.update', saveCreds)
+    sock.ev.on('creds.update', async () => {
+        try {
+            const jsonString = JSON.stringify(state.creds, BufferJSON.replacer);
+
+            await sql`
+            INSERT INTO whatsapp_auth (session_id, key_id, data, updated_at)
+            VALUES ('wavi', 'creds', ${jsonString}::jsonb, NOW())
+            ON CONFLICT (session_id, key_id) 
+            DO UPDATE SET data = EXCLUDED.data, updated_at = NOW()
+        `;
+        } catch (error) {
+            console.error(`[Auth] Failed to update creds:`, error);
+        }
+    });
 
     sock.ev.on('connection.update', (update) => {
         const { connection, lastDisconnect, qr } = update

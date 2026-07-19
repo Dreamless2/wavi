@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, readFileSync, rmSync, mkdirSync } from 'fs'
 import { basename, join } from 'path'
-import { getDevice } from '@whiskeysockets/baileys'
+import { getDevice } from 'baileys'
 
 const TIME_HOURS = process.env.DOWNLOADS_CLEANUP_INTERVAL_HOURS ? parseInt(process.env.DOWNLOADS_CLEANUP_INTERVAL_HOURS, 10) : 48
 const DOWNLOADS_CLEANUP_INTERVAL_MS = TIME_HOURS * 60 * 60 * 1000
