@@ -8,7 +8,7 @@ import express from 'express'
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-app.get('/')
+app.get('/', )
 
 const server = app.listen(PORT, () => {
   console.log(`Server executing in ${process.env.NODE_ENV} mode on port ${PORT}`);
