@@ -6,7 +6,7 @@ import { senderDevice, senderMetadata, sendTelegramMedia, sendTelegramText, shou
 import express from 'express'
 
 //express app
-const app = express
+onst app = express
 const server = app.listen(PORT, () => {
   console.log(`Server executing in ${process.env.NODE_ENV} mode on port ${PORT}`);
 });
