@@ -16,7 +16,7 @@
     "qrcode-terminal": "^0.12.0"
   },
   "allowScripts": {
-    "@whiskeysockets/baileys@7.0.0-rc.9": true,
-    "protobufjs@7.6.5": true
+    "protobufjs@7.6.5": true,
+    "@whiskeysockets/baileys@7.0.0-rc13": true
   }
 }
