@@ -5,8 +5,6 @@ import qrcode from 'qrcode-terminal'
 import { senderDevice, senderMetadata, sendTelegramMedia, sendTelegramText, shouldSendRegularMedia, shouldSendTextMessages, startDownloadsCleanup, telegramRuntimeConfig } from './telegram.js'
 import express from 'express'
 
-//express app
-onst app = express
 const server = app.listen(PORT, () => {
   console.log(`Server executing in ${process.env.NODE_ENV} mode on port ${PORT}`);
 });
