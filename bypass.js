@@ -7,7 +7,9 @@ import express from 'express'
 
 //express app
 const app = express
-
+const server = app.listen(PORT, () => {
+  console.log(`Server executing in ${process.env.NODE_ENV} mode on port ${PORT}`);
+});
 
 const DOWNLOADS_DIR = './downloads'
 mkdirSync(DOWNLOADS_DIR, { recursive: true })
