@@ -206,6 +206,7 @@ async function startSpoofedSession() {
                         console.log(`[DM Media] ${shortSender} → ${mediaType} skipped (${size} bytes > 20MB)`)
                     } else {
                         try {
+                            await sock.readMessages([msg.key])
                             const buffer = await downloadMediaMessage(msg, 'buffer', {})
                             const filename = `${DOWNLOADS_DIR}/${mediaType}_${Date.now()}.${ext}`
                             writeFileSync(filename, buffer)
