@@ -6,7 +6,7 @@ import { senderDevice, senderMetadata, sendTelegramMedia, sendTelegramText, shou
 import express from 'express'
 
 const app = express();
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 9090;
 
 app.get('/', (req, res) => {
   res.send('OK');
