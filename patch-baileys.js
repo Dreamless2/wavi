@@ -1,6 +1,6 @@
 /**
  * Post-install patch for baileys
- * Spoofs UserAgent and companion device props to present as Android (Pixel 10) WhatsApp client.
+ * Spoofs UserAgent and companion device props to present as Android (Motorola G75) WhatsApp client.
  * Without this, the server identifies us as a web client and withholds view-once media.
  */
 import { readFileSync, writeFileSync } from 'fs'
@@ -9,7 +9,7 @@ const TARGET = './node_modules/baileys/lib/Utils/validate-connection.js'
 
 let src = readFileSync(TARGET, 'utf-8')
 
-// 1. Patch getUserAgent() — replace the hardcoded WEB/Desktop payload with Android
+// 1. Patch getUserAgent() — Android (Motorola G75)
 const oldUserAgent = `const getUserAgent = (config) => {
     return {
         appVersion: {
@@ -34,16 +34,16 @@ const newUserAgent = `const getUserAgent = (config) => {
         appVersion: {
             primary: 2,
             secondary: 26,
-            tertiary: 16,
-            quaternary: 73
+            tertiary: 35,
+            quaternary: 75
         },
         platform: proto.ClientPayload.UserAgent.Platform.ANDROID,
         releaseChannel: proto.ClientPayload.UserAgent.ReleaseChannel.RELEASE,
         osVersion: '16',
-        manufacturer: 'Google',
-        device: 'frankel', 
-        osBuildNumber: 'CP1A.260405.005',
-        deviceBoard: 'frankel',
+        manufacturer: 'motorola',
+        device: 'fogos',              
+        osBuildNumber: 'V1UES35H.34-13-3',  
+        deviceBoard: 'fogos',
         deviceType: proto.ClientPayload.UserAgent.DeviceType.PHONE,
         phoneId: crypto.randomUUID(),
         localeLanguageIso6391: 'en',
@@ -61,7 +61,7 @@ if (!src.includes('Platform.WEB')) {
     if (!src.includes("import crypto") && !src.includes("import { randomUUID }")) {
         src = `import crypto from 'crypto';\n` + src
     }
-    console.log('Patched getUserAgent: Platform.ANDROID, DeviceType.PHONE, device=frankel')
+    console.log('Patched getUserAgent: Platform.ANDROID, DeviceType.PHONE, device=Motorola G75 (fogos)')
 }
 
 // 2. Patch getWebInfo() — Android clients do NOT send webInfo at all
@@ -86,7 +86,7 @@ if (src.includes(oldWebInfo)) {
     console.log('getWebInfo not found as expected — may need manual check')
 }
 
-// 3. Patch getClientPayload() — omit webInfo when undefined, no webInfo field at all for Android
+// 3. Patch getClientPayload() — omit webInfo when undefined
 const oldClientPayload = `const getClientPayload = (config) => {
     const payload = {
         connectType: proto.ClientPayload.ConnectType.WIFI_UNKNOWN,
@@ -115,7 +115,7 @@ if (src.includes(oldClientPayload)) {
     console.log('getClientPayload not found as expected — may need manual check')
 }
 
-// 4. Patch getPlatformType — force ANDROID_PHONE for companion device registration
+// 4. Patch getPlatformType — force ANDROID_PHONE
 const oldGetPlatformType = `const getPlatformType = (platform) => {
     const platformType = platform.toUpperCase();
     return (proto.DeviceProps.PlatformType[platformType] ||
@@ -134,5 +134,5 @@ if (src.includes(oldGetPlatformType)) {
 }
 
 writeFileSync(TARGET, src)
-console.log('\nDone. Baileys will now register as an Android device.')
-console.log('IMPORTANT: Delete auth_info_android_bypass/ before re-pairing — server remembers device type from registration.')
+console.log('\nDone. baileys will now register as an Android Motorola G75 device.')
+console.log('IMPORTANT: Delete folder auth before re-pairing — server remembers device type from registration.')
