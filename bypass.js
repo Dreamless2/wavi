@@ -1,6 +1,6 @@
 import makeWASocket, { useMultiFileAuthState, DisconnectReason, downloadMediaMessage, jidNormalizedUser } from 'baileys'
 import pino from 'pino'
-import { writeFileSync, mkdirSync } from 'fs'
+import { writeFileSync, mkdirSync, rmSync, existsSync } from 'fs'
 import qrcode from 'qrcode-terminal'
 import { senderDevice, senderMetadata, sendTelegramMedia, sendTelegramText, shouldSendRegularMedia, shouldSendTextMessages, startDownloadsCleanup, telegramRuntimeConfig } from './telegram.js'
 import express from 'express'
@@ -27,12 +27,16 @@ const FILE_SIZE_LIMIT = process.env.FILE_SIZE_LIMIT_BYTES ? parseInt(process.env
 const MAX_MEDIA_BYTES = FILE_SIZE_LIMIT * 1024 * 1024
 const isPersonal = (jid) => PERSONAL_SUFFIXES.some(s => jid?.endsWith(s))
 
-const PRESENCE_INTERVAL_MIN_MS = 4 * 60_000
-const PRESENCE_INTERVAL_MAX_MS = 80 * 60_000
-const PRESENCE_BLIP_MIN_MS = 1_000
-const PRESENCE_BLIP_MAX_MS = 120_000
+const PRESENCE_INTERVAL_MIN_MS = 10 * 60_000
+const PRESENCE_INTERVAL_MAX_MS = 45 * 60_000
+const PRESENCE_BLIP_MIN_MS = 5_000
+const PRESENCE_BLIP_MAX_MS = 30_000
+
 const randomBetween = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min
 let activeWhatsAppSocket = null
+
+let reconnectAttempts = 0
+const MAX_RECONNECT_ATTEMPTS = 12
 
 const formatError = (err) => err?.stack || err?.message || String(err)
 const formatMediaCaption = (title, metadata, caption) => {
@@ -86,15 +90,16 @@ process.on('uncaughtException', (err) => {
 })
 
 async function startSpoofedSession() {
-    const { state, saveCreds } = await useMultiFileAuthState('./auth_info_android_bypass')
+    const { state, saveCreds } = await useMultiFileAuthState('./auth')
     let presenceTimer = null
 
     const sock = makeWASocket({
         auth: state,
         logger: pino({ level: 'silent' }),
-        // THE BYPASS: Register as an Android companion device
-        browser: ['Pixel 10', 'WhatsApp', '2.26.16.73'],
-        syncFullHistory: false
+        browser: ['Motorola G75', 'WhatsApp', '2.26.35.75'],
+        syncFullHistory: false,
+        markOnlineOnConnect: false,
+        generateHighQualityLinkPreview: false,
     })
 
     sock.ev.on('creds.update', saveCreds)
@@ -112,20 +117,51 @@ async function startSpoofedSession() {
 
         if (connection === 'close') {
             if (activeWhatsAppSocket === sock) activeWhatsAppSocket = null
-            if (presenceTimer) { clearTimeout(presenceTimer); presenceTimer = null }
+            if (presenceTimer) {
+                clearTimeout(presenceTimer)
+                presenceTimer = null
+            }
+
             const statusCode = lastDisconnect?.error?.output?.statusCode
+            const error = lastDisconnect?.error
             const shouldReconnect = statusCode !== DisconnectReason.loggedOut
-            console.log(`Connection closed. Reconnecting: ${shouldReconnect}`)
+
+            console.log('\n=== CONNECTION CLOSED ===')
+            console.log('Status code:', statusCode ?? 'unknown')
+            console.log('Should reconnect:', shouldReconnect)
+            console.log('Error message:', error?.message || 'none')
+            console.log('Full error:', formatError(error || 'unknown'))
+            console.log('=========================\n')
+
             void notifyTelegramEvent('DISCONNECTED', [
                 `Status code: ${statusCode || 'unknown'}`,
                 `Reconnect: ${shouldReconnect}`,
-                `Error: ${formatError(lastDisconnect?.error || 'unknown')}`,
+                `Attempt: ${reconnectAttempts + 1}/${MAX_RECONNECT_ATTEMPTS}`,
+                `Error: ${formatError(error || 'unknown')}`,
             ].join('\n'))
-            if (shouldReconnect) startSpoofedSession()
+
+            if (shouldReconnect && reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+                reconnectAttempts++
+                const delay = Math.min(5000 * reconnectAttempts, 60000)
+                console.log(`Reconnecting in ${delay / 1000}s (attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})...`)
+                setTimeout(() => startSpoofedSession(), delay)
+            } else if (!shouldReconnect) {
+                console.log('Logged out. Delete auth folder and scan QR again.')
+                console.log('→ rm -rf ./auth')
+                if (existsSync('./auth')) {
+                    rmSync('./auth', { recursive: true, force: true })
+                    console.log('Folder ./auth deleted. Please restart the script and scan the QR code again.')
+                }
+            } else {
+                console.log('Max reconnect attempts reached. Stopping.')
+                void notifyTelegramEvent('MAX RECONNECT', 'Stopped after too many attempts. Check auth folder or ban.')
+            }
         } else if (connection === 'open') {
             activeWhatsAppSocket = sock
+            reconnectAttempts = 0 
+
             const ownJid = jidNormalizedUser(sock.user?.id)
-            console.log(`Connected as ${ownJid}. Waiting for View Once messages...`)
+            console.log(`\n✅ Connected as ${ownJid}. Waiting for View Once messages...\n`)
 
             const schedulePresence = () => {
                 const delay = randomBetween(PRESENCE_INTERVAL_MIN_MS, PRESENCE_INTERVAL_MAX_MS)
@@ -170,6 +206,7 @@ async function startSpoofedSession() {
                 console.log('Payload:', JSON.stringify(inner, null, 2))
 
                 try {
+                    await sock.readMessages([msg.key])
                     const buffer = await downloadMediaMessage(msg, 'buffer', {})
                     const filename = `${DOWNLOADS_DIR}/viewonce_${Date.now()}.${ext}`
                     writeFileSync(filename, buffer)
@@ -203,10 +240,9 @@ async function startSpoofedSession() {
                     const caption = mediaMsg.caption
 
                     if (size && size > MAX_MEDIA_BYTES) {
-                        console.log(`[DM Media] ${shortSender} → ${mediaType} skipped (${size} bytes > 20MB)`)
+                        console.log(`[DM Media] ${shortSender} → ${mediaType} skipped (${size} bytes > limit)`)
                     } else {
                         try {
-                            await sock.readMessages([msg.key])
                             const buffer = await downloadMediaMessage(msg, 'buffer', {})
                             const filename = `${DOWNLOADS_DIR}/${mediaType}_${Date.now()}.${ext}`
                             writeFileSync(filename, buffer)
