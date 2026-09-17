@@ -1,6 +1,6 @@
 node_modules/
 auth_info_android_bypass/
+auth/
 downloads/
 .env
 run.bat
-koyeb.exe
